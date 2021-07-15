@@ -87,6 +87,7 @@ onboarding:
     ssl: true
 
 rewards:
+  node_env: production
   segmentApiKey: 'writeApiKey'
   shouldSendRewards: false
   relayer:
