@@ -46,3 +46,4 @@ spec:
 {{ include "common.env-var" (dict "name" "NETWORK" "dict" .Values.environment "value_name" "network") | indent 10 }}
 {{ include "common.env-var" (dict "name" "SEGMENT_API_KEY" "dict" .Values.rewards "value_name" "segmentApiKey") | indent 10 }}
 {{ include "common.env-var" (dict "name" "SHOULD_SEND_REWARDS" "dict" .Values.rewards "value_name" "shouldSendRewards") | indent 10 }}
+{{ include "common.env-var" (dict "name" "INVITE_REWARD_AMOUNT_IN_CUSD" "dict" .Values.rewards "value_name" "inviteAmount") | indent 10 }}

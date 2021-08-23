@@ -90,6 +90,7 @@ rewards:
   node_env: production
   segmentApiKey: 'writeApiKey'
   shouldSendRewards: false
+  inviteAmount: 1
   relayer:
     node_env: production
     image:

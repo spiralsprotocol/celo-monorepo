@@ -295,6 +295,7 @@ async function helmParameters(celoEnv: string, context: string, useForno: boolea
     `--set rewards.db.password=${rewardDatabasePassword}`,
     `--set rewards.segmentApiKey=${segmentApiKey}`,
     `--set rewards.shouldSendRewards=${fetchEnv(envVar.KOMENCI_SHOULD_SEND_REWARDS)}`,
+    `--set rewards.inviteAmount=${fetchEnv(envVar.KOMENCI_INVITE_AMOUNT)}`,
     `--set rewards.metrics.enabled=true`,
     `--set rewards.metrics.prometheusPort=9090`,
     `--set rewards.relayer.replicas=${rewardsRelayerCount}`,
