@@ -12,23 +12,21 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
   static fromEnv() {
     return new TwilioVerifyProvider(
       fetchEnv('TWILIO_ACCOUNT_SID'),
-      fetchEnv('TWILIO_MESSAGING_SERVICE_SID'),
+      fetchEnv('TWILIO_AUTH_TOKEN'),
+      readUnsupportedRegionsFromEnv('TWILIO_UNSUPPORTED_REGIONS', 'TWILIO_BLACKLIST'),
+      // fetchEnv('TWILIO_MESSAGING_SERVICE_SID'),
       // TODO double check that switching this to fetchEnv doesn't break backwards compatibility
       // i.e. that this still works with no service ID
       // fetchEnvOrDefault('TWILIO_VERIFY_SERVICE_SID', ''),
-      fetchEnv('TWILIO_VERIFY_SERVICE_SID'),
-      // TODO this can go away I think
-      readUnsupportedRegionsFromEnv('TWILIO_VERIFY_DISABLED_REGIONS'),
-      fetchEnv('TWILIO_AUTH_TOKEN'),
+      fetchEnv('TWILIO_VERIFY_SERVICE_SID')
       // TODO: this should probably go to super class
-      readUnsupportedRegionsFromEnv('TWILIO_UNSUPPORTED_REGIONS', 'TWILIO_BLACKLIST')
     )
   }
 
   client: Twilio
-  messagingServiceSid: string
+  // messagingServiceSid: string
   verifyServiceSid: string
-  verifyDisabledRegionCodes: string[]
+  // verifyDisabledRegionCodes: string[]
   type = SmsProviderType.TWILIO
   deliveryStatusURL: string | undefined
   // https://www.twilio.com/docs/verify/api/verification#start-new-verification
@@ -74,19 +72,19 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
   constructor(
     twilioSid: string,
     // TODO eval if messagingServiceId is needed?
-    messagingServiceSid: string,
-    verifyServiceSid: string,
-    verifyDisabledRegionCodes: string[],
+    // messagingServiceSid: string,
     twilioAuthToken: string,
-    unsupportedRegionCodes: string[]
+    unsupportedRegionCodes: string[],
+    verifyServiceSid: string
+    // verifyDisabledRegionCodes: string[],
   ) {
     // TODO fix this --> SID + Auth belong in super
-    super()
+    super(twilioSid, twilioAuthToken, unsupportedRegionCodes)
     this.client = twilio(twilioSid, twilioAuthToken)
-    this.messagingServiceSid = messagingServiceSid
+    // this.messagingServiceSid = messagingServiceSid
     this.verifyServiceSid = verifyServiceSid
-    this.verifyDisabledRegionCodes = verifyDisabledRegionCodes
-    this.unsupportedRegionCodes = unsupportedRegionCodes
+    // this.verifyDisabledRegionCodes = verifyDisabledRegionCodes
+    // this.unsupportedRegionCodes = unsupportedRegionCodes
   }
 
   async receiveDeliveryStatusReport(req: express.Request, logger: Logger) {
@@ -125,13 +123,6 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
 
   async initialize(deliveryStatusURL?: string) {
     // Ensure the messaging service exists
-    // try {
-    //   await this.client.messaging.services.get(this.messagingServiceSid).fetch()
-    //   this.deliveryStatusURL = deliveryStatusURL
-    // } catch (error) {
-    //   throw new Error(`Twilio Messaging Service could not be fetched: ${error}`)
-    // }
-    // if (this.verifyServiceSid) {
     try {
       await this.client.verify.services
         .get(this.verifyServiceSid)
@@ -154,10 +145,6 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
 
   async sendSms(attestation: SmsFields) {
     // Prefer Verify API if Verify Service is present and not disabled for region
-    // if (
-    //   this.verifyServiceSid &&
-    //   !this.verifyDisabledRegionCodes.includes(attestation.countryCode)
-    // ) {
     const requestParams: any = {
       to: attestation.phoneNumber,
       channel: 'sms',
@@ -197,15 +184,5 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
         throw e
       }
     }
-    // } else {
-    //   // Send using the message service
-    //   const m = await this.client.messages.create({
-    //     body: attestation.message,
-    //     to: attestation.phoneNumber,
-    //     from: this.messagingServiceSid,
-    //     statusCallback: this.deliveryStatusURL,
-    //   })
-    //   return m.sid
-    // }
   }
 }
