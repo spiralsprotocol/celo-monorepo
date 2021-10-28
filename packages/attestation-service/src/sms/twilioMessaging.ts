@@ -1,27 +1,20 @@
-import bodyParser from 'body-parser'
-import Logger from 'bunyan'
-import express from 'express'
-import twilio, { Twilio } from 'twilio'
 import { fetchEnv } from '../env'
-import { AttestationStatus, SmsFields } from '../models/attestation'
+import { SmsFields } from '../models/attestation'
 import { readUnsupportedRegionsFromEnv, SmsProviderType } from './base'
-import { receivedDeliveryReport } from './index'
 import { TwilioSmsProvider } from './twilio'
 
 export class TwilioMessagingProvider extends TwilioSmsProvider {
   static fromEnv() {
     return new TwilioMessagingProvider(
       fetchEnv('TWILIO_ACCOUNT_SID'),
-      fetchEnv('TWILIO_MESSAGING_SERVICE_SID'),
       fetchEnv('TWILIO_AUTH_TOKEN'),
-      readUnsupportedRegionsFromEnv('TWILIO_UNSUPPORTED_REGIONS', 'TWILIO_BLACKLIST')
+      readUnsupportedRegionsFromEnv('TWILIO_UNSUPPORTED_REGIONS', 'TWILIO_BLACKLIST'),
+      fetchEnv('TWILIO_MESSAGING_SERVICE_SID')
     )
   }
 
-  client: Twilio
   messagingServiceSid: string
   type = SmsProviderType.TWILIO
-  deliveryStatusURL: string | undefined
 
   twilioSupportedLocales = [
     'af',
@@ -64,55 +57,19 @@ export class TwilioMessagingProvider extends TwilioSmsProvider {
 
   constructor(
     twilioSid: string,
-    messagingServiceSid: string,
     twilioAuthToken: string,
-    unsupportedRegionCodes: string[]
+    unsupportedRegionCodes: string[],
+    messagingServiceSid: string
   ) {
-    super()
-    this.client = twilio(twilioSid, twilioAuthToken)
+    super(twilioSid, twilioAuthToken, unsupportedRegionCodes)
     this.messagingServiceSid = messagingServiceSid
-    this.unsupportedRegionCodes = unsupportedRegionCodes
-  }
-
-  async receiveDeliveryStatusReport(req: express.Request, logger: Logger) {
-    await receivedDeliveryReport(
-      req.body.MessageSid,
-      this.deliveryStatus(req.body.MessageStatus),
-      req.body.ErrorCode,
-      logger
-    )
-  }
-
-  deliveryStatus(messageStatus: string | null): AttestationStatus {
-    switch (messageStatus) {
-      case 'delivered':
-        return AttestationStatus.Delivered
-      case 'failed':
-        return AttestationStatus.Failed
-      case 'undelivered':
-        return AttestationStatus.Failed
-      case 'sent':
-        return AttestationStatus.Upstream
-      case 'queued':
-        return AttestationStatus.Queued
-    }
-    return AttestationStatus.Other
-  }
-
-  deliveryStatusMethod = () => 'POST'
-
-  deliveryStatusHandlers() {
-    return [
-      bodyParser.urlencoded({ extended: false }),
-      twilio.webhook({ url: this.deliveryStatusURL! }),
-    ]
   }
 
   async initialize(deliveryStatusURL?: string) {
     // Ensure the messaging service exists
     try {
       await this.client.messaging.services.get(this.messagingServiceSid).fetch()
-      this.deliveryStatusURL = deliveryStatusURL
+      super.initialize(deliveryStatusURL)
     } catch (error) {
       throw new Error(`Twilio Messaging Service could not be fetched: ${error}`)
     }

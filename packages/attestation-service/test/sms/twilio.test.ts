@@ -1,5 +1,5 @@
 import { TwilioSmsProvider } from '../../src/sms/twilio'
-// import { TwilioMessagingProvider } from '../../src/sms/twilioMessaging'
+import { TwilioMessagingProvider } from '../../src/sms/twilioMessaging'
 import { TwilioVerifyProvider } from '../../src/sms/twilioVerify'
 import { mockMessagesCreate, mockVerifyCreate } from '../__mocks__/twilio'
 
@@ -11,8 +11,7 @@ describe('TwilioSmsProvider tests', () => {
     const verifyServiceSid = 'verify-sid-123!'
     const twilioAuthToken = 'fakeAuth-123!'
     const unsupportedRegionCodes = ['GH', 'IJ', 'KL']
-    // const messagingServiceSid = 'messagingId-123!'
-    // const verifyDisabledRegionCodes = ['CD', 'EF']
+    const messagingServiceSid = 'messagingId-123!'
     const attestation = {
       account: '0x123',
       identifier: '0x456',
@@ -33,9 +32,6 @@ describe('TwilioSmsProvider tests', () => {
     it('should initialize TwilioSmsProvider', async () => {
       const twilioSmsProvider = new TwilioSmsProvider(
         twilioSid,
-        // messagingServiceSid,
-        // verifyServiceSid,
-        // verifyDisabledRegionCodes,
         twilioAuthToken,
         unsupportedRegionCodes
       )
@@ -58,17 +54,17 @@ describe('TwilioSmsProvider tests', () => {
       expect(mockVerifyCreate).toBeCalledTimes(1)
       expect(mockMessagesCreate).not.toBeCalled()
     })
-    // it('should initialize and send SMS via TwilioMessagingProvider', async () => {
-    //   const twilioMessagingProvider = new TwilioMessagingProvider(
-    //     twilioSid,
-    //     twilioAuthToken,
-    //     unsupportedRegionCodes,
-    //     messagingServiceSid
-    //   )
-    //   await twilioMessagingProvider.initialize('fake-delivery-status-url')
-    //   await twilioMessagingProvider.sendSms(attestation)
-    //   expect(mockMessagesCreate).toBeCalledTimes(1)
-    //   expect(mockVerifyCreate).not.toBeCalled()
-    // })
+    it('should initialize and send SMS via TwilioMessagingProvider', async () => {
+      const twilioMessagingProvider = new TwilioMessagingProvider(
+        twilioSid,
+        twilioAuthToken,
+        unsupportedRegionCodes,
+        messagingServiceSid
+      )
+      await twilioMessagingProvider.initialize('fake-delivery-status-url')
+      await twilioMessagingProvider.sendSms(attestation)
+      expect(mockMessagesCreate).toBeCalledTimes(1)
+      expect(mockVerifyCreate).not.toBeCalled()
+    })
   })
 })

@@ -1,14 +1,6 @@
-// import bodyParser from 'body-parser'
-// import Logger from 'bunyan'
-// import express from 'express'
-// import twilio from 'twilio'
 import { fetchEnv } from '../env'
-import {
-  // AttestationStatus,
-  SmsFields,
-} from '../models/attestation'
+import { SmsFields } from '../models/attestation'
 import { readUnsupportedRegionsFromEnv, SmsProviderType } from './base'
-// import { receivedDeliveryReport } from './index'
 import { TwilioSmsProvider } from './twilio'
 
 export class TwilioVerifyProvider extends TwilioSmsProvider {
