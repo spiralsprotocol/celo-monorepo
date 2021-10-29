@@ -16,60 +16,22 @@ export class TwilioMessagingProvider extends TwilioSmsProvider {
   messagingServiceSid: string
   type = SmsProviderType.TWILIO
 
-  twilioSupportedLocales = [
-    'af',
-    'ar',
-    'ca',
-    'cs',
-    'da',
-    'de',
-    'el',
-    'en',
-    'en-gb',
-    'es',
-    'fi',
-    'fr',
-    'he',
-    'hi',
-    'hr',
-    'hu',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'ms',
-    'nb',
-    'nl',
-    'pl',
-    'pt',
-    'pr-br',
-    'ro',
-    'ru',
-    'sv',
-    'th',
-    'tl',
-    'tr',
-    'vi',
-    'zh',
-    'zh-cn',
-    'zh-hk',
-  ]
-
   constructor(
     twilioSid: string,
     twilioAuthToken: string,
     unsupportedRegionCodes: string[],
     messagingServiceSid: string
   ) {
+    // Initializes twilio client
     super(twilioSid, twilioAuthToken, unsupportedRegionCodes)
     this.messagingServiceSid = messagingServiceSid
   }
 
   async initialize(deliveryStatusURL?: string) {
     // Ensure the messaging service exists
+    super.initialize(deliveryStatusURL)
     try {
       await this.client.messaging.services.get(this.messagingServiceSid).fetch()
-      super.initialize(deliveryStatusURL)
     } catch (error) {
       throw new Error(`Twilio Messaging Service could not be fetched: ${error}`)
     }

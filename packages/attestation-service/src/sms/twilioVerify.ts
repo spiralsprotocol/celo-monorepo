@@ -18,7 +18,7 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
 
   verifyServiceSid: string
   type = SmsProviderType.TWILIO
-  deliveryStatusURL: string | undefined
+
   // https://www.twilio.com/docs/verify/api/verification#start-new-verification
   twilioSupportedLocales = [
     'af',
@@ -65,6 +65,7 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
     unsupportedRegionCodes: string[],
     verifyServiceSid: string
   ) {
+    // Initializes twilio client
     super(twilioSid, twilioAuthToken, unsupportedRegionCodes)
     this.verifyServiceSid = verifyServiceSid
   }
@@ -89,7 +90,6 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
   }
 
   async sendSms(attestation: SmsFields) {
-    // Prefer Verify API if Verify Service is present and not disabled for region
     const requestParams: any = {
       to: attestation.phoneNumber,
       channel: 'sms',

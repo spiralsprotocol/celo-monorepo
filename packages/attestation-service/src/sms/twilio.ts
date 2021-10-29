@@ -19,50 +19,15 @@ export class TwilioSmsProvider extends SmsProvider {
   client: Twilio
   type = SmsProviderType.TWILIO
   deliveryStatusURL: string | undefined
-  // https://www.twilio.com/docs/verify/api/verification#start-new-verification
-  twilioSupportedLocales = [
-    'af',
-    'ar',
-    'ca',
-    'cs',
-    'da',
-    'de',
-    'el',
-    'en',
-    'en-gb',
-    'es',
-    'fi',
-    'fr',
-    'he',
-    'hi',
-    'hr',
-    'hu',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'ms',
-    'nb',
-    'nl',
-    'pl',
-    'pt',
-    'pr-br',
-    'ro',
-    'ru',
-    'sv',
-    'th',
-    'tl',
-    'tr',
-    'vi',
-    'zh',
-    'zh-cn',
-    'zh-hk',
-  ]
 
   constructor(twilioSid: string, twilioAuthToken: string, unsupportedRegionCodes: string[]) {
     super()
     this.client = twilio(twilioSid, twilioAuthToken)
     this.unsupportedRegionCodes = unsupportedRegionCodes
+  }
+
+  async initialize(deliveryStatusURL?: string) {
+    this.deliveryStatusURL = deliveryStatusURL
   }
 
   async receiveDeliveryStatusReport(req: express.Request, logger: Logger) {
@@ -97,11 +62,6 @@ export class TwilioSmsProvider extends SmsProvider {
       bodyParser.urlencoded({ extended: false }),
       twilio.webhook({ url: this.deliveryStatusURL! }),
     ]
-  }
-
-  async initialize(deliveryStatusURL?: string) {
-    // Ensure the messaging service exists
-    this.deliveryStatusURL = deliveryStatusURL
   }
 
   async sendSms(_attestation: SmsFields): Promise<string> {
