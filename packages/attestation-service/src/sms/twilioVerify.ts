@@ -17,7 +17,7 @@ export class TwilioVerifyProvider extends TwilioSmsProvider {
   }
 
   verifyServiceSid: string
-  type = SmsProviderType.TWILIO
+  type = SmsProviderType.TWILIO_VERIFY
 
   // https://www.twilio.com/docs/verify/api/verification#start-new-verification
   twilioSupportedLocales = [

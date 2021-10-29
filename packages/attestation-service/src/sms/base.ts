@@ -26,7 +26,10 @@ export abstract class SmsProvider {
 export enum SmsProviderType {
   NEXMO = 'nexmo',
   UNKNOWN = 'unknown',
+  // EN TODO: figure out what to do about twilio stuff
   TWILIO = 'twilio',
+  TWILIO_MESSAGING = 'twiliomessaging',
+  TWILIO_VERIFY = 'twilioverify',
   MESSAGEBIRD = 'messagebird',
   TELEKOM = 'telekom',
 }

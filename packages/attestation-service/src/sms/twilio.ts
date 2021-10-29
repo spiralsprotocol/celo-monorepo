@@ -68,3 +68,7 @@ export class TwilioSmsProvider extends SmsProvider {
     throw new Error('Not implemented')
   }
 }
+
+// Importing in index directly from the files causes a circular import error
+export { TwilioMessagingProvider } from './twilioMessaging'
+export { TwilioVerifyProvider } from './twilioVerify'

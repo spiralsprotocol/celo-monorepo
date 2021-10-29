@@ -14,7 +14,7 @@ export class TwilioMessagingProvider extends TwilioSmsProvider {
   }
 
   messagingServiceSid: string
-  type = SmsProviderType.TWILIO
+  type = SmsProviderType.TWILIO_MESSAGING
 
   constructor(
     twilioSid: string,

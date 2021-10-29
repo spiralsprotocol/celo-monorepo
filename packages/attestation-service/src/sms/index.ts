@@ -21,7 +21,7 @@ import { obfuscateNumber, SmsProvider, SmsProviderType } from './base'
 import { MessageBirdSmsProvider } from './messagebird'
 import { NexmoSmsProvider } from './nexmo'
 import { TelekomSmsProvider } from './telekom'
-import { TwilioSmsProvider } from './twilio'
+import { TwilioMessagingProvider, TwilioVerifyProvider } from './twilio'
 
 // Maximum delivery attempts (including first) regardless of provider
 const maxDeliveryAttempts = parseInt(
@@ -105,11 +105,21 @@ export async function initializeSmsProviders(
         smsProviders.push(nexmoProvider)
         smsProvidersByType[SmsProviderType.NEXMO] = nexmoProvider
         break
-      case SmsProviderType.TWILIO:
-        const twilioProvider = TwilioSmsProvider.fromEnv()
-        await twilioProvider.initialize(deliveryStatusURLForProviderType(configuredSmsProvider))
-        smsProviders.push(twilioProvider)
-        smsProvidersByType[SmsProviderType.TWILIO] = twilioProvider
+      case SmsProviderType.TWILIO_VERIFY:
+        const twilioVerifyProvider = TwilioVerifyProvider.fromEnv()
+        await twilioVerifyProvider.initialize(
+          deliveryStatusURLForProviderType(configuredSmsProvider)
+        )
+        smsProviders.push(twilioVerifyProvider)
+        smsProvidersByType[SmsProviderType.TWILIO_VERIFY] = twilioVerifyProvider
+        break
+      case SmsProviderType.TWILIO_MESSAGING:
+        const twilioMessagingProvider = TwilioMessagingProvider.fromEnv()
+        await twilioMessagingProvider.initialize(
+          deliveryStatusURLForProviderType(configuredSmsProvider)
+        )
+        smsProviders.push(twilioMessagingProvider)
+        smsProvidersByType[SmsProviderType.TWILIO_MESSAGING] = twilioMessagingProvider
         break
       default:
         throw new Error(`Unknown sms provider type specified: ${configuredSmsProvider}`)
