@@ -69,13 +69,20 @@ function phoneNumberTypeToString(t: PhoneNumberType): string {
   }
 }
 
+function providerNamesToList(providers: string) {
+  return providers
+    .replace(
+      new RegExp(`\\b(${SmsProviderType.TWILIO})\\b`, 'g'),
+      `${SmsProviderType.TWILIO_VERIFY},${SmsProviderType.TWILIO_MESSAGING}`
+    )
+    .split(',')
+    .filter((t) => t != null && t !== '')
+}
+
 export async function initializeSmsProviders(
   deliveryStatusURLForProviderType: (type: string) => string
 ) {
-  const smsProvidersToConfigure = fetchEnv('SMS_PROVIDERS')
-    .split(',')
-    .filter((t) => t != null && t !== '') as Array<SmsProviderType | string>
-
+  const smsProvidersToConfigure = providerNamesToList(fetchEnv('SMS_PROVIDERS'))
   if (smsProvidersToConfigure.length === 0) {
     throw new Error('You have to specify at least one sms provider')
   }
@@ -134,9 +141,9 @@ function smsProvidersFor(
   phoneNumber: E164Number,
   logger: Logger
 ): SmsProvider[] {
-  const providersForRegion = fetchEnvOrDefault(`SMS_PROVIDERS_${countryCode}`, '')
-    .split(',')
-    .filter((t) => t != null && t !== '')
+  const providersForRegion = providerNamesToList(
+    fetchEnvOrDefault(`SMS_PROVIDERS_${countryCode}`, '')
+  )
   let providers =
     providersForRegion.length > 0
       ? providersForRegion.map((name) => smsProvidersByType[name])
@@ -194,10 +201,9 @@ function providersToCsv(providers: SmsProvider[]) {
 // but cannot require providers not configured or unsupported for this country code.
 function getProvidersFor(attestation: AttestationModel, logger: Logger) {
   const validProviders = smsProvidersFor(attestation.countryCode, attestation.phoneNumber, logger)
-  const attestationProviders = attestation.providers
-    .split(',')
-    .filter((t) => t != null && t !== '')
-    .map((name) => smsProvidersByType[name])
+  const attestationProviders = providerNamesToList(attestation.providers).map(
+    (name) => smsProvidersByType[name]
+  )
 
   for (const p of attestationProviders) {
     if (!validProviders.find((v) => p.type === v.type)) {

@@ -3,8 +3,6 @@ import {
   TwilioSmsProvider,
   TwilioVerifyProvider,
 } from '../../src/sms/twilio'
-// import { TwilioMessagingProvider } from '../../src/sms/twilioMessaging'
-// import { TwilioVerifyProvider } from '../../src/sms/twilioVerify'
 import { mockMessagesCreate, mockVerifyCreate } from '../__mocks__/twilio'
 
 jest.mock('../__mocks__/twilio')
