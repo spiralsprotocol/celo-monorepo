@@ -8,8 +8,9 @@ import { verifySignature } from '@celo/utils/lib/signatureUtils'
 import Logger from 'bunyan'
 import { ec as EC } from 'elliptic'
 import { Request } from 'express'
-import { ErrorMessage } from '../interfaces'
+import { DomainRequest, ErrorMessage } from '../interfaces'
 import { FULL_NODE_TIMEOUT_IN_MS, RETRY_COUNT, RETRY_DELAY_IN_MS } from './constants'
+import { EIP712Optional } from '@celo/utils/lib/sign-typed-data-utils'
 
 const ec = new EC('secp256k1')
 
@@ -59,6 +60,23 @@ export async function authenticateUser(
     'Message was not authenticated with DEK, attempting to authenticate using wallet key'
   )
   return verifySignature(message, messageSignature, signer)
+}
+
+export async function authenticateDomain(
+  request: Request<DomainRequest>,
+  logger: Logger
+): Promise<boolean> {
+  logger.debug('Authenticating domain')
+
+  const message = JSON.stringify(request.body)
+  const signature = request.body?.options?.signature as EIP712Optional<string>
+  const signer = request.body?.domain?.address as EIP712Optional<string>
+
+  if (!signer.defined || !signature.defined) {
+    return false
+  }
+
+  return verifySignature(message, signature.value, signer.value)
 }
 
 export function verifyDEKSignature(

@@ -4,6 +4,9 @@ import Logger from 'bunyan'
 import * as auth from '../../src/utils/authentication'
 import { ContractKit } from '@celo/contractkit'
 import { AuthenticationMethod } from '@celo/identity/lib/odis/query'
+import { DomainQuotaStatusRequest } from '../../src/interfaces'
+import { SequentialDelayDomain } from '@celo/identity/lib/odis/domains'
+import { defined, noBool, noString } from '@celo/utils/lib/sign-typed-data-utils'
 
 describe('Authentication test suite', () => {
   const logger = Logger.createLogger({
@@ -99,6 +102,62 @@ describe('Authentication test suite', () => {
       } as ContractKit
 
       const result = await auth.authenticateUser(sampleRequest, mockContractKit, logger)
+
+      expect(result).toBeFalsy()
+    })
+  })
+
+  describe('authenticateDomain utility', () => {
+    it('Should fail authentication with missing signer', async () => {
+      const domainRequest: DomainQuotaStatusRequest<SequentialDelayDomain> = {
+        domain: {
+          name: 'ODIS Sequential Delay Domain',
+          version: '1',
+          stages: [
+            { delay: 0, resetTimer: noBool, batchSize: defined(2), repetitions: defined(10) },
+          ],
+          address: noString,
+          salt: noString,
+        },
+        options: {
+          signature: defined('<signature>'),
+          nonce: defined(2),
+        },
+        sessionID: noString,
+      }
+      const request = {
+        get: (_: string) => '',
+        body: domainRequest,
+      } as Request<DomainQuotaStatusRequest>
+
+      const result = await auth.authenticateDomain(request, logger)
+
+      expect(result).toBeFalsy()
+    })
+
+    it('Should fail authentication with missing signature', async () => {
+      const domainRequest: DomainQuotaStatusRequest<SequentialDelayDomain> = {
+        domain: {
+          name: 'ODIS Sequential Delay Domain',
+          version: '1',
+          stages: [
+            { delay: 0, resetTimer: noBool, batchSize: defined(2), repetitions: defined(10) },
+          ],
+          address: defined('0x0000000000000000000000000000000000000b0b'),
+          salt: noString,
+        },
+        options: {
+          signature: noString,
+          nonce: defined(2),
+        },
+        sessionID: noString,
+      }
+      const request = {
+        get: (_: string) => '',
+        body: domainRequest,
+      } as Request<DomainQuotaStatusRequest>
+
+      const result = await auth.authenticateDomain(request, logger)
 
       expect(result).toBeFalsy()
     })
