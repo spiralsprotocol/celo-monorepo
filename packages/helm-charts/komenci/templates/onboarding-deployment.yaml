@@ -58,6 +58,7 @@ spec:
 {{ include "common.env-var" (dict "name" "THROTTLE_LIMIT" "dict" .Values.onboarding.throttle "value_name" "limit") | indent 10 }}
 {{ include "common.env-var" (dict "name" "NETWORK" "dict" .Values.environment "value_name" "network") | indent 10 }}
 {{ include "common.env-var" (dict "name" "PUBLIC_URL" "dict" .Values.onboarding "value_name" "publicUrl") | indent 10 }}
+{{ include "common.env-var" (dict "name" "FORNO_API_KEY" "dict" .Values.onboarding "value_name" "fornoApiKey") | indent 10 }}
           readinessProbe:
             httpGet:
               path: /v1/health

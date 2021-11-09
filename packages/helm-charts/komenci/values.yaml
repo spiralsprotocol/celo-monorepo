@@ -26,6 +26,7 @@ kubectl:
 
 relayer:
   node_env: production
+  fornoApiKey: komenci
   image:
     repository: celotestnet.azurecr.io/komenci/relayer
     tag: dae43ddce108a73da07dce73875b980ff077c7d4
@@ -55,6 +56,7 @@ relayer:
 
 onboarding:
   node_env: production
+  fornoApiKey: komenci
   image:
     repository: celotestnet.azurecr.io/komenci/onboarding
     tag: dae43ddce108a73da07dce73875b980ff077c7d4
@@ -89,6 +91,7 @@ onboarding:
 rewards:
   node_env: production
   segmentApiKey: 'writeApiKey'
+  fornoApiKey: komenci
   shouldSendRewards: false
   inviteAmount: 1
   relayer:
@@ -118,7 +121,7 @@ rewards:
     port: 5432
     username: 'postgres'
     database: 'postgres'
-    synchronize: true
+    synchronize: false
     ssl: true
 
 loggingAgent:

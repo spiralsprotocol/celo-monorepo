@@ -269,6 +269,7 @@ async function helmParameters(celoEnv: string, context: string, useForno: boolea
     `--set onboarding.db.port=${databaseConfig.port}`,
     `--set onboarding.db.username=${databaseConfig.username}`,
     `--set onboarding.db.password=${databasePassword}`,
+    `--set onboarding.fornoApiKey=komenci`,
     `--set onboarding.publicHostname=${getPublicHostname(clusterConfig.regionName, celoEnv)}`,
     `--set onboarding.publicUrl=${
       'https://' + getPublicHostname(clusterConfig.regionName, celoEnv)
@@ -282,6 +283,7 @@ async function helmParameters(celoEnv: string, context: string, useForno: boolea
     `--set relayer.rpcProviderUrls.ws=${wsRpcProviderUrl}`,
     `--set relayer.metrics.enabled=true`,
     `--set relayer.metrics.prometheusPort=9090`,
+    `--set relayer.fornoApiKey=komenci`,
     `--set-string relayer.unusedKomenciAddresses='${fetchEnvOrFallback(
       envVar.KOMENCI_UNUSED_KOMENCI_ADDRESSES,
       ''
@@ -293,6 +295,7 @@ async function helmParameters(celoEnv: string, context: string, useForno: boolea
     `--set rewards.db.port=${rewardDatabaseConfig.port}`,
     `--set rewards.db.username=${rewardDatabaseConfig.username}`,
     `--set rewards.db.password=${rewardDatabasePassword}`,
+    `--set rewards.fornoApiKey=komenci`,
     `--set rewards.segmentApiKey=${segmentApiKey}`,
     `--set rewards.shouldSendRewards=${fetchEnv(envVar.KOMENCI_SHOULD_SEND_REWARDS)}`,
     `--set rewards.inviteAmount=${fetchEnv(envVar.KOMENCI_INVITE_AMOUNT)}`,
