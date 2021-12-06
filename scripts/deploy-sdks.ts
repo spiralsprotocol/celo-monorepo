@@ -3,7 +3,7 @@
 /*
  * deploy-sdks script
  * THIS SCRIPT MUST BE RUN WITH NPM TO PUBLISH - `npm run deploy-sdks`
- * From the monorepo root run `yarn deploy-sdks`
+ * From the monorepo root run `npm deploy-sdks`
  * You'll first be asked which version to update the sdks to.
  * You can pick major, minor, patch, a semantic version,
  * or nothing if you don't want to update the versions.
@@ -121,10 +121,11 @@ type Answers = {
 
   const otpPrompt = [
     {
-      name: 'otp',
+      name: 'newOtp',
       description: colors.green(`Enter 2FA code`),
     },
   ]
+  let otp = ''
 
   let successfulPackages = []
   if (shouldPublish) {
@@ -144,7 +145,12 @@ type Answers = {
 
         console.log(`Publishing ${packageJson.name}@${packageJson.version}`)
         // Here you enter the 2FA code for npm
-        const { otp } = await prompt.get(otpPrompt)
+        let { newOtp } = (await prompt.get(otpPrompt)) as { newOtp: string }
+        if (!newOtp) {
+          newOtp = otp
+        } else {
+          otp = newOtp
+        }
 
         // Here is the actual publishing
         child_process.execSync(

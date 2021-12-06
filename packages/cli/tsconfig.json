@@ -7,5 +7,6 @@
     "target": "es6"
   },
   "include": ["src", "../contractkit/types"],
+  "exclude": ["**/*.test.ts"],
   "references": [{ "path": "../sdk/utils" }, { "path": "../sdk/contractkit" }]
 }
