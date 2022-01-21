@@ -43,7 +43,4 @@ interface IAccounts {
   ) external;
   function authorizeAttestationSigner(address, uint8, bytes32, bytes32) external;
   function createAccount() external returns (bool);
-
-  function setPaymentDelegation(address, uint256) external;
-  function getPaymentDelegation(address) external view returns (address, uint256);
 }

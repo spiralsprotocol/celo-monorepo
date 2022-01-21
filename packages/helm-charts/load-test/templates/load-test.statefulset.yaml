@@ -104,6 +104,7 @@ spec:
         - "-c"
         - |-
           set -euo pipefail
+          ADDITIONAL_FLAGS=""
           cp /var/geth/static-nodes.json /root/.celo/static-nodes.json
 
           ACCOUNT_ADDRESSES=$(cat /root/.celo/address | tr '\n' ',')
@@ -122,8 +123,10 @@ spec:
           --consoleoutput=stdout \
           --verbosity=1 \
           --unlock=$ACCOUNT_ADDRESSES \
+          --allow-insecure-unlock \
           --password=/root/.celo/account/accountSecret \
-          --port 30303
+          --port 30303 \
+          ${ADDITIONAL_FLAGS}
         resources:
           requests:
             memory: 4Gi
@@ -211,7 +214,7 @@ spec:
             cpu: 2
         env:
         - name: LOAD_TEST_USE_RANDOM_RECIPIENT
-          value: "{{ default "true" .Values.use_random_recipient }}"
+          value: "{{ default "false" .Values.use_random_recipient }}"
         - name: MNEMONIC
           valueFrom:
             secretKeyRef:
@@ -222,8 +225,6 @@ spec:
             secretKeyRef:
               name: {{ .Values.environment }}-load-test
               key: accountSecret
-        - name: LOAD_TEST_USE_RANDOM_RECIPIENT
-          value: "true"
         volumeMounts:
         - name: data
           mountPath: /root/.celo

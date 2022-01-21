@@ -177,6 +177,8 @@ fi
 
 {{ include  "common.bootnode-flag-script" . | indent 4 }}
 
+{{ include  "common.geth-save-mem-profile" . | indent 4 }}
+
 {{ default "" .extra_setup | indent 4 }}
 
     exec geth \
@@ -565,4 +567,23 @@ else
   ADDITIONAL_FLAGS="${ADDITIONAL_FLAGS} --rpc --rpcaddr $LISTEN_ADDRESS --rpcapi=$RPC_APIS --rpccorsdomain='*' --rpcvhosts=*"
   ADDITIONAL_FLAGS="${ADDITIONAL_FLAGS} --ws --wsaddr $LISTEN_ADDRESS --wsorigins=* --wsapi=$RPC_APIS --wsport=$WS_PORT"
 fi
+{{- end -}}
+
+{{- define "common.geth-save-mem-profile" -}}
+cat > /writeMemProfile.sh <<'EOF'
+#!/bin/sh
+
+sleep 300 # Starting geth and giving some time so first snapshot can be considered as base
+folder="/root/.celo/memProfiles/$(date +%s)"
+mkdir -p "$folder"
+i=0
+while true; do
+  geth attach --exec "debug.writeMemProfile(\"$folder/dump$i\")"
+  i=$((i+1))
+  sleep 3600
+done
+
+EOF
+chmod +x /writeMemProfile.sh
+/writeMemProfile.sh &
 {{- end -}}

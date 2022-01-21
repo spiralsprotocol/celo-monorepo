@@ -187,6 +187,8 @@ spec:
 
 {{ include  "common.geth-http-ws-flags" (dict "Values" $.Values "rpc_apis" "eth,net,web3,debug" "ws_port" "8545" "listen_address" "0.0.0.0") | indent 10 }}
 
+{{ include  "common.geth-save-mem-profile" . | indent 10 }}
+
 {{ .Values.geth.secondayExtraSnippet | indent 10 }}
 
           exec geth \
