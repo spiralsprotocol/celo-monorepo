@@ -28,6 +28,7 @@ yargs
     },
   ])
   .commandDir('cmds', { extensions: ['ts'] })
+  .strictCommands()
   .demandCommand()
   .help()
   .wrap(yargs.terminalWidth()).argv
