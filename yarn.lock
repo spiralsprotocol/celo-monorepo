@@ -1433,13 +1433,12 @@
   resolved "https://registry.yarnpkg.com/@celo/poprf/-/poprf-0.1.6.tgz#f8960a454b027910741595ecd3fcc067838c16e1"
   integrity sha512-zWcChteh5tcNr2s85gDNnz6hGvVF3NK1c5qlMPrMn70KWiy7d0YzXzkNYCjL99OQn1SUx+SD9RtZ2l48ByAtKw==
 
-"@celo/typechain-target-web3-v1-celo@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@celo/typechain-target-web3-v1-celo/-/typechain-target-web3-v1-celo-0.2.0.tgz#2560b470e348d2628debe899885724ce5b218bc3"
-  integrity sha512-zqpSoCCYymx1XLAeYtUhZqTYF069kwFQ6ugQQXja9lPfevGAdgEqTYzAXTVMAATHx4B3QZM2Hnx0+RKDD9188g==
+"@celo/typechain-target-web3-v1-celo@https://github.com/celo-org/typechain-target-web3-v1-celo#8a4603085ed29135d23e8ecb20c817bc52020978":
+  version "0.3.0-dev"
+  resolved "https://github.com/celo-org/typechain-target-web3-v1-celo#8a4603085ed29135d23e8ecb20c817bc52020978"
   dependencies:
-    lodash "~4.17.19"
-    typechain "2.0.0"
+    lodash "~4.17.21"
+    typechain "^2.0.1"
 
 "@celo/utils@1.5.1":
   version "1.5.1"
@@ -17404,7 +17403,7 @@ lodash.without@~4.4.0:
   resolved "https://registry.yarnpkg.com/lodash.without/-/lodash.without-4.4.0.tgz#3cd4574a00b67bae373a94b748772640507b7aac"
   integrity sha1-PNRXSgC2e643OpS3SHcmQFB7eqw=
 
-lodash@4.17.14, lodash@4.17.15, lodash@4.x, lodash@^2.4.1, lodash@^3.10.1, lodash@^4.16.4, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@^4.3.0, lodash@~4.17.19:
+lodash@4.17.14, lodash@4.17.15, lodash@4.x, lodash@^2.4.1, lodash@^3.10.1, lodash@^4.16.4, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@^4.3.0, lodash@~4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -25332,10 +25331,10 @@ typechain@1.0.5:
     lodash "^4.17.15"
     ts-generator "^0.0.8"
 
-typechain@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/typechain/-/typechain-2.0.0.tgz#62143b48cdf8f95a777f1b76617af077b2d44eee"
-  integrity sha512-O+hsAUwtBpqCfoq46Grm52OEdm0GBEu78LxrEzkkGdwUdCoCZpNb2HPzPoNB1MXiRnNhEOGMFyf05UbT2/bUEw==
+typechain@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/typechain/-/typechain-2.0.1.tgz#4fa91006d871e5805d41f265880603d0817b74d6"
+  integrity sha512-GVigpARnr2tV9L+8WecF5huK+qEonNgh+Vp9UR/EayoTV4+3G8Yabhvf+p/QJVOz3JLM4Eo3ERxYmjjJMRXc/A==
   dependencies:
     command-line-args "^4.0.7"
     debug "^4.1.1"

@@ -3,7 +3,7 @@ import { EIP712TypedData, generateTypedDataHash } from '@celo/utils/lib/sign-typ
 import { parseSignatureWithoutPrefix, Signature } from '@celo/utils/lib/signatureUtils'
 import debugFactory from 'debug'
 import Web3 from 'web3'
-import { AbiCoder } from './abi-types'
+import { AbiCoder, AbiItem } from './abi-types'
 import { assertIsCeloProvider, CeloProvider } from './celo-provider'
 import {
   Address,
@@ -99,6 +99,10 @@ export class Connection {
 
   hexToAscii = (hex: string) => {
     return this.web3.utils.hexToAscii(hex)
+  }
+
+  newContract = (abi: AbiItem | AbiItem[], address?: string) => {
+    return new this.web3.eth.Contract(abi, address)
   }
 
   /**

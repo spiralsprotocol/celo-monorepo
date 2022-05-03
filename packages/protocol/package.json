@@ -92,7 +92,7 @@
   },
   "devDependencies": {
     "@celo/flake-tracker": "0.0.1-dev",
-    "@celo/typechain-target-web3-v1-celo": "0.2.0",
+    "@celo/typechain-target-web3-v1-celo": "https://github.com/celo-org/typechain-target-web3-v1-celo#8a4603085ed29135d23e8ecb20c817bc52020978",
     "@celo/typescript": "0.0.1",
     "@types/bn.js": "^4.11.0",
     "@types/chai": "^4.1.3",
