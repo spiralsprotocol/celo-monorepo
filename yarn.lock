@@ -1433,9 +1433,10 @@
   resolved "https://registry.yarnpkg.com/@celo/poprf/-/poprf-0.1.6.tgz#f8960a454b027910741595ecd3fcc067838c16e1"
   integrity sha512-zWcChteh5tcNr2s85gDNnz6hGvVF3NK1c5qlMPrMn70KWiy7d0YzXzkNYCjL99OQn1SUx+SD9RtZ2l48ByAtKw==
 
-"@celo/typechain-target-web3-v1-celo@https://github.com/celo-org/typechain-target-web3-v1-celo#8a4603085ed29135d23e8ecb20c817bc52020978":
-  version "0.3.0-dev"
-  resolved "https://github.com/celo-org/typechain-target-web3-v1-celo#8a4603085ed29135d23e8ecb20c817bc52020978"
+"@celo/typechain-target-web3-v1-celo@0.3.0-alpha.1":
+  version "0.3.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@celo/typechain-target-web3-v1-celo/-/typechain-target-web3-v1-celo-0.3.0-alpha.1.tgz#d1a6a7c26efd159766a119390a10b978e64c4bd7"
+  integrity sha512-or7NeJBADqlT60O1cEF3kJPIEA4AcAHTB+rW+OUgOO10D0QTXnLGH/qX8c4zfx3l58MTsI54wPMnJ7jYqrDsHQ==
   dependencies:
     lodash "~4.17.21"
     typechain "^2.0.1"

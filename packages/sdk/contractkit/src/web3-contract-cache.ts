@@ -190,7 +190,7 @@ export class Web3ContractCache {
       debug('Initiating contract %s', contract)
       const createFn = ProxyContracts.includes(contract) ? newProxy : ContractFactories[contract]
       this.cacheMap[contract] = createFn(
-        this.registry.connection.web3,
+        this.registry.connection.newContract,
         address
       ) as ContractCacheMap[C]
     }
