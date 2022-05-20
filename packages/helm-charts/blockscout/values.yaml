@@ -200,6 +200,8 @@ blockscout:
   archiveNodes:
     jsonrpcHttpUrl: http://tx-nodes-private:8545
     jsonrpcWsUrl: ws://tx-nodes-private:8545
+  metrics:
+    enabled: false
   image:
     repository: gcr.io/celo-testnet/blockscout
     pullPolicy: IfNotPresent
