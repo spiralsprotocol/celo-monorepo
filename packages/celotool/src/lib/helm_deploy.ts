@@ -216,7 +216,7 @@ export async function installCertManagerAndNginx(
   celoEnv: string,
   clusterConfig?: BaseClusterConfig
 ) {
-  const nginxChartVersion = '3.9.0'
+  const nginxChartVersion = '4.1.4'
   const nginxChartNamespace = 'default'
 
   // Check if cert-manager is installed in any namespace
@@ -319,6 +319,9 @@ export async function helmAddAndUpdateRepos() {
   )
   await execCmdWithExitOnFailure(`helm repo add stable https://charts.helm.sh/stable`)
   await execCmdWithExitOnFailure(`helm repo add grafana https://grafana.github.io/helm-charts`)
+  await execCmdWithExitOnFailure(
+    `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts`
+  )
   await execCmdWithExitOnFailure(`helm repo update`)
 }
 
@@ -352,7 +355,7 @@ export async function installAndEnableMetricsDeps(
   )
   if (!kubeStateMetricsReleaseExists) {
     await execCmdWithExitOnFailure(
-      `helm install kube-state-metrics stable/kube-state-metrics --set rbac.create=true -n default`
+      `helm upgrade --install -n default kube-state-metrics prometheus-community/kube-state-metrics --set rbac.create=true`
     )
   }
   if (installPrometheus) {
