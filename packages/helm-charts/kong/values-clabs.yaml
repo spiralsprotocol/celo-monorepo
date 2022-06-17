@@ -6,7 +6,13 @@ ingressController:
   ingressClass: kong
 
 postgresql:
-  postgresqlPassword: kong
+  global:
+    postgresql:
+      auth:
+        postgresPassword: kong
+        username: kong
+        password: kong
+        database: kong
 
 service:
   exposeAdmin: true
