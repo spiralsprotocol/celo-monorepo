@@ -1282,4 +1282,485 @@ contract('FederatedAttestations', (accounts: string[]) => {
       )
     })
   })
+
+  describe.only('benchmark #batchRevokeAttestations', () => {
+    // Variant 1 == register (1 account, identifier) up to maxN
+    const registerAttestationsVariant1 = async (maxN: number, issuer: string) => {
+      const benchmarkIdentifiers: string[] = []
+      const benchmarkAccounts: string[] = []
+
+      for (let i = 0; i < maxN; i++) {
+        const pnIdentifier = getPhoneHash(phoneNumber, `salt${i}`)
+        const newAccount = await web3.eth.accounts.create().address
+        await federatedAttestations.registerAttestationAsIssuer(
+          pnIdentifier,
+          issuer,
+          newAccount,
+          nowUnixTime,
+          { from: issuer }
+        )
+        benchmarkIdentifiers.push(pnIdentifier)
+        benchmarkAccounts.push(newAccount)
+      }
+      return [benchmarkIdentifiers, benchmarkAccounts]
+    }
+
+    describe('unique account <-> identifier, one issuer', () => {
+      let batchIssuer1 = accounts[2]
+
+      beforeEach(async () => {
+        await accountsInstance.createAccount({ from: batchIssuer1 })
+      })
+      it('[revokeAttestation] how much gas does it take to revoke 1 attestation?', async () => {
+        //
+        const [benchmarkIdentifiers, benchmarkAccounts] = await registerAttestationsVariant1(
+          1,
+          batchIssuer1
+        )
+        const tx = await federatedAttestations.revokeAttestation(
+          benchmarkIdentifiers[0],
+          batchIssuer1,
+          benchmarkAccounts[0],
+          { from: batchIssuer1 }
+        )
+        console.log(tx.receipt.gasUsed)
+      })
+      it('[revokeAttestationWithIndex] how much gas does it take to revoke 1 attestations', async () => {
+        //
+        const [benchmarkIdentifiers, benchmarkAccounts] = await registerAttestationsVariant1(
+          1,
+          batchIssuer1
+        )
+        const tx = await federatedAttestations.revokeAttestationWithIndex(
+          benchmarkIdentifiers[0],
+          batchIssuer1,
+          benchmarkAccounts[0],
+          0,
+          0,
+          { from: batchIssuer1 }
+        )
+        console.log(tx.receipt.gasUsed)
+      })
+      const params = [
+        // 10,
+        // 100,
+        135,
+        160,
+      ]
+      params.forEach(async (numAttestations) => {
+        describe(`revoke ${numAttestations}`, async () => {
+          it('batchRevokeAttestation', async () => {
+            //
+            const [benchmarkIdentifiers, benchmarkAccounts] = await registerAttestationsVariant1(
+              numAttestations,
+              batchIssuer1
+            )
+            const tx = await federatedAttestations.batchRevokeAttestations(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+          it('batchRevokeAttestationWithIndices', async () => {
+            //
+            const [benchmarkIdentifiers, benchmarkAccounts] = await registerAttestationsVariant1(
+              numAttestations,
+              batchIssuer1
+            )
+            const tx = await federatedAttestations.batchRevokeAttestationsWithIndices(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              new Array<number>(numAttestations).fill(0),
+              new Array<number>(numAttestations).fill(0),
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+        })
+      })
+    })
+
+    describe('1 account per identifier; 3 issuers per (account, identifier) in random order', () => {
+      const batchIssuer1 = accounts[2]
+      const batchIssuer2 = accounts[3]
+      const batchIssuer3 = accounts[4]
+
+      const shuffleArray = (arr: Array<any>) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[arr[i], arr[j]] = [arr[j], arr[i]]
+        }
+        return arr
+      }
+
+      // Variant 2 == register (1 account, identifier) with multiple issuers (random order registered)
+      const registerAttestationsVariant2 = async (
+        maxN: number,
+        issuersToRandomize: string[],
+        batchIssuer: string
+      ) => {
+        const benchmarkIdentifiers: string[] = []
+        const benchmarkAccounts: string[] = []
+        const revokeIndices: number[] = []
+
+        for (let i = 0; i < maxN; i++) {
+          // Randomize issuerToRevoke order
+          issuersToRandomize = shuffleArray(issuersToRandomize)
+
+          // TODO may need to write a batchRegister function for testing...
+          const pnIdentifier = getPhoneHash(phoneNumber, `salt${i}`)
+          const newAccount = await web3.eth.accounts.create().address
+          for (let [index, randomIssuer] of issuersToRandomize.entries()) {
+            await federatedAttestations.registerAttestationAsIssuer(
+              pnIdentifier,
+              randomIssuer,
+              newAccount,
+              nowUnixTime,
+              { from: randomIssuer }
+            )
+            if (randomIssuer === batchIssuer) {
+              revokeIndices.push(index)
+            }
+          }
+          // Add once (i.e. revoke only for `issuerToRevoke`)
+          benchmarkIdentifiers.push(pnIdentifier)
+          benchmarkAccounts.push(newAccount)
+        }
+        return [benchmarkIdentifiers, benchmarkAccounts, revokeIndices]
+      }
+
+      beforeEach(async () => {
+        // Setup
+        await accountsInstance.createAccount({ from: batchIssuer1 })
+        await accountsInstance.createAccount({ from: batchIssuer2 })
+        await accountsInstance.createAccount({ from: batchIssuer3 })
+      })
+
+      describe('revoke 1 attestation', async () => {
+        let benchmarkIdentifiers: string[]
+        let benchmarkAccounts: string[]
+        // let revokeIndices: number[]
+
+        beforeEach(async () => {
+          ;[
+            // @ts-ignore
+            benchmarkIdentifiers,
+            // @ts-ignore
+            benchmarkAccounts,
+            // @ts-ignore
+            // revokeIndices,
+            _,
+          ] = await registerAttestationsVariant2(
+            1,
+            [batchIssuer1, batchIssuer2, batchIssuer3],
+            batchIssuer1
+          )
+        })
+
+        it('revokeAttestation', async () => {
+          const tx = await federatedAttestations.revokeAttestation(
+            benchmarkIdentifiers[0],
+            batchIssuer1,
+            benchmarkAccounts[0],
+            { from: batchIssuer1 }
+          )
+          console.log(tx.receipt.gasUsed)
+        })
+
+        it('revokeAttestationWithIndex', async () => {
+          // Gas:
+          const tx = await federatedAttestations.revokeAttestationWithIndex(
+            benchmarkIdentifiers[0],
+            batchIssuer1,
+            benchmarkAccounts[0],
+            0,
+            0,
+            { from: batchIssuer1 }
+          )
+          console.log(tx.receipt.gasUsed)
+        })
+      })
+
+      const params = [
+        // 10,
+        // 100,
+        135,
+        160,
+      ]
+      params.forEach(async (numAttestations) => {
+        describe(`revoke ${numAttestations} attestations`, async () => {
+          let benchmarkIdentifiers: string[]
+          let benchmarkAccounts: string[]
+
+          beforeEach(async () => {
+            ;[
+              // @ts-ignore
+              benchmarkIdentifiers,
+              // @ts-ignore
+              benchmarkAccounts,
+              // @ts-ignore
+              _,
+            ] = await registerAttestationsVariant2(
+              numAttestations,
+              [batchIssuer1, batchIssuer2, batchIssuer3],
+              batchIssuer1
+            )
+          })
+
+          it('batchRevokeAttestations', async () => {
+            const tx = await federatedAttestations.batchRevokeAttestations(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+
+          it('batchRevokeAttestationsWithIndices', async () => {
+            // Gas:
+            const tx = await federatedAttestations.batchRevokeAttestationsWithIndices(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              new Array<number>(numAttestations).fill(0),
+              new Array<number>(numAttestations).fill(0),
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+        })
+      })
+    })
+
+    describe('n accounts, a bunch of identifiers per account', () => {
+      const batchIssuer1 = accounts[2]
+
+      // Variant 3 == register (1 account, a bunch of identifiers) with one issuer
+      const registerAttestationsVariant3 = async (
+        issuer: string,
+        numAccounts: number,
+        identifiersPerAccount: number
+      ) => {
+        const benchmarkIdentifiers: string[] = []
+        const benchmarkAccounts: string[] = []
+        // const revokeIndices: number[][] = []
+        const revokeIndices: number[] = []
+
+        for (let i = 0; i < numAccounts; i++) {
+          const newAccount = await web3.eth.accounts.create().address
+          // revokeIndices.push([])
+          for (let j = 0; j < identifiersPerAccount; j++) {
+            const pnIdentifier = getPhoneHash(phoneNumber, `salt${i}${j}`)
+            await federatedAttestations.registerAttestationAsIssuer(
+              pnIdentifier,
+              issuer,
+              newAccount,
+              nowUnixTime,
+              { from: issuer }
+            )
+            benchmarkIdentifiers.push(pnIdentifier)
+            benchmarkAccounts.push(newAccount)
+            // logic for weird index order shifting
+            const weirdIndex =
+              j < Math.floor(identifiersPerAccount / 2) ? j : identifiersPerAccount - 1 - j
+            revokeIndices.push(weirdIndex)
+            // revokeIndices[i].push(weirdIndex)
+          }
+        }
+        return [benchmarkIdentifiers, benchmarkAccounts, revokeIndices]
+      }
+
+      beforeEach(async () => {
+        // Setup
+        await accountsInstance.createAccount({ from: batchIssuer1 })
+      })
+
+      describe('revoke 1 attestation', async () => {
+        let benchmarkIdentifiers: string[]
+        let benchmarkAccounts: string[]
+        // let revokeIndices: number[]
+
+        beforeEach(async () => {
+          ;[
+            // @ts-ignore
+            benchmarkIdentifiers,
+            // @ts-ignore
+            benchmarkAccounts,
+            // @ts-ignore
+            _,
+          ] = await registerAttestationsVariant3(batchIssuer1, 1, 1)
+          // console.log(revokeIndices)
+        })
+
+        it('revokeAttestation', async () => {
+          const tx = await federatedAttestations.revokeAttestation(
+            benchmarkIdentifiers[0],
+            batchIssuer1,
+            benchmarkAccounts[0],
+            { from: batchIssuer1 }
+          )
+          console.log(tx.receipt.gasUsed)
+        })
+
+        it('revokeAttestationWithIndex', async () => {
+          // Gas:
+          const tx = await federatedAttestations.revokeAttestationWithIndex(
+            benchmarkIdentifiers[0],
+            batchIssuer1,
+            benchmarkAccounts[0],
+            0,
+            0,
+            { from: batchIssuer1 }
+          )
+          console.log(tx.receipt.gasUsed)
+        })
+      })
+
+      const params = [
+        [1, 10],
+        [3, 5],
+        [10, 10],
+        [3, 45],
+        [4, 40],
+      ]
+      params.forEach(async ([nAccounts, mIds]) => {
+        describe(`(${nAccounts} accounts (${mIds} IDs per))`, async () => {
+          let benchmarkIdentifiers: string[]
+          let benchmarkAccounts: string[]
+          let revokeIndices: number[]
+
+          beforeEach(async () => {
+            ;[
+              // @ts-ignore
+              benchmarkIdentifiers,
+              // @ts-ignore
+              benchmarkAccounts,
+              // @ts-ignore
+              // revokeIndices,
+              revokeIndices,
+            ] = await registerAttestationsVariant3(batchIssuer1, nAccounts, mIds)
+          })
+
+          it('batchRevokeAttestations', async () => {
+            const tx = await federatedAttestations.batchRevokeAttestations(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+
+          it('batchRevokeAttestationsWithIndices', async () => {
+            // Gas:
+            const tx = await federatedAttestations.batchRevokeAttestationsWithIndices(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              new Array<number>(nAccounts * mIds).fill(0),
+              revokeIndices,
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+        })
+      })
+    })
+
+    describe('n identifiers, a bunch of accounts per id', () => {
+      const batchIssuer1 = accounts[2]
+
+      // Variant 4 == register (a bunch of identifiers, some accounts) with one issuer
+      const registerAttestationsVariant4 = async (
+        issuer: string,
+        numAccounts: number,
+        identifiersPerAccount: number
+      ) => {
+        const benchmarkIdentifiers: string[] = []
+        const benchmarkAccounts: string[] = []
+        const revokeIndices: number[] = []
+
+        for (let i = 0; i < identifiersPerAccount; i++) {
+          const pnIdentifier = getPhoneHash(phoneNumber, `salt${i}`)
+          for (let j = 0; j < numAccounts; j++) {
+            const newAccount = await web3.eth.accounts.create().address
+            await federatedAttestations.registerAttestationAsIssuer(
+              pnIdentifier,
+              issuer,
+              newAccount,
+              nowUnixTime,
+              { from: issuer }
+            )
+            benchmarkIdentifiers.push(pnIdentifier)
+            benchmarkAccounts.push(newAccount)
+            // logic for weird index order shifting
+            const weirdIndex = j < Math.floor(numAccounts / 2) ? j : numAccounts - 1 - j
+            revokeIndices.push(weirdIndex)
+          }
+        }
+        return [benchmarkIdentifiers, benchmarkAccounts, revokeIndices]
+      }
+
+      beforeEach(async () => {
+        // Setup
+        await accountsInstance.createAccount({ from: batchIssuer1 })
+      })
+
+      const params = [
+        // IDs, Accounts per ID
+        [1, 10],
+        [3, 5],
+        [10, 10],
+        [3, 45],
+        [4, 40],
+      ]
+      params.forEach(async ([mIds, nAccounts]) => {
+        describe(`revoke (${mIds} ID (${nAccounts} accounts per)) attestations`, async () => {
+          let benchmarkIdentifiers: string[]
+          let benchmarkAccounts: string[]
+          let revokeIndices: number[]
+
+          beforeEach(async () => {
+            ;[
+              // @ts-ignore
+              benchmarkIdentifiers,
+              // @ts-ignore
+              benchmarkAccounts,
+              // @ts-ignore
+              revokeIndices,
+            ] = await registerAttestationsVariant4(batchIssuer1, nAccounts, mIds)
+          })
+
+          it('batchRevokeAttestations', async () => {
+            const tx = await federatedAttestations.batchRevokeAttestations(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+
+          it('batchRevokeAttestationsWithIndices', async () => {
+            // Gas:
+            const tx = await federatedAttestations.batchRevokeAttestationsWithIndices(
+              batchIssuer1,
+              benchmarkIdentifiers,
+              benchmarkAccounts,
+              revokeIndices,
+              new Array<number>(nAccounts * mIds).fill(0),
+              { from: batchIssuer1 }
+            )
+            console.log(tx.receipt.gasUsed)
+          })
+        })
+      })
+    })
+
+    // TODO: optimized version of batchRevoke?
+  })
 })

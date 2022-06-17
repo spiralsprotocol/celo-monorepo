@@ -527,4 +527,110 @@ contract FederatedAttestations is
     }
     revert("Attestation to be revoked does not exist");
   }
+
+  /** TODO testing out new implementation */
+  function revokeAttestationWithIndex(
+    bytes32 identifier,
+    address issuer,
+    address account,
+    uint256 attestationIndex,
+    uint256 identifierIndex
+  ) external {
+    require(
+      account == msg.sender ||
+        // Minor gas optimization to prevent storage lookup in Accounts.sol if issuer == msg.sender
+        issuer == msg.sender ||
+        getAccounts().attestationSignerToAccount(msg.sender) == issuer,
+      "Sender does not have permission to revoke this attestation"
+    );
+    _revokeAttestationWithIndex(identifier, issuer, account, attestationIndex, identifierIndex);
+  }
+
+  function batchRevokeAttestationsWithIndices(
+    address issuer,
+    bytes32[] calldata identifiers,
+    address[] calldata accounts,
+    uint256[] calldata attestationIndices,
+    uint256[] calldata identifierIndices
+  ) external {
+    // TODO ASv2 Reviewers: we are planning to provide sensible limits in the SDK
+    // to prevent out of gas errors -- is that sufficient or should we limit here as well?
+    require(identifiers.length == accounts.length, "Unequal number of identifiers and accounts");
+    require(
+      accounts.length == attestationIndices.length,
+      "Lengths of accounts and attestationIndices are not equal"
+    );
+    require(
+      identifiers.length == identifierIndices.length,
+      "Lengths of identifiers and identifierIndices are not equal"
+    );
+    require(
+      issuer == msg.sender || getAccounts().attestationSignerToAccount(msg.sender) == issuer,
+      "Sender does not have permission to revoke attestations from this issuer"
+    );
+
+    for (uint256 i = 0; i < identifiers.length; i = i.add(1)) {
+      _revokeAttestationWithIndex(
+        identifiers[i],
+        issuer,
+        accounts[i],
+        attestationIndices[i],
+        identifierIndices[i]
+      );
+    }
+  }
+
+  function _revokeAttestationWithIndex(
+    bytes32 identifier,
+    address issuer,
+    address account,
+    uint256 attestationIndex,
+    uint256 identifierIndex
+  ) private {
+    uint256 numAttestations = identifierToAttestations[identifier][issuer].length;
+    require(attestationIndex < numAttestations, "attestationIndex is invalid");
+
+    uint256 numIdentifiers = addressToIdentifiers[account][issuer].length;
+    require(identifierIndex < numIdentifiers, "identifierIndex is invalid");
+
+    OwnershipAttestation memory attestationToRevoke = identifierToAttestations[identifier][issuer][attestationIndex];
+    require(attestationToRevoke.account == account, "attestationIndex does not match account");
+    require(
+      addressToIdentifiers[account][issuer][identifierIndex] == identifier,
+      "identifierIndex does not match identifier"
+    );
+
+    // Swap element-to-delete with tail and pop tail, if index isn't the last element already
+    if (attestationIndex != numAttestations - 1) {
+      identifierToAttestations[identifier][issuer][attestationIndex] = identifierToAttestations[identifier][issuer][numAttestations -
+        1];
+    }
+    identifierToAttestations[identifier][issuer].pop();
+
+    if (identifierIndex != numIdentifiers - 1) {
+      addressToIdentifiers[account][issuer][identifierIndex] = addressToIdentifiers[account][issuer][numIdentifiers -
+        1];
+    }
+    addressToIdentifiers[account][issuer].pop();
+
+    bytes32 attestationHash = getUniqueAttestationHash(
+      identifier,
+      issuer,
+      account,
+      attestationToRevoke.signer,
+      attestationToRevoke.issuedOn
+    );
+
+    assert(!revokedAttestations[attestationHash]);
+    revokedAttestations[attestationHash] = true;
+
+    emit AttestationRevoked(
+      identifier,
+      issuer,
+      account,
+      attestationToRevoke.signer,
+      attestationToRevoke.issuedOn,
+      attestationToRevoke.publishedOn
+    );
+  }
 }
