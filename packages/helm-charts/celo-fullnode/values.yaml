@@ -37,7 +37,19 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: {}
+# affinity: {}
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: component
+            operator: In
+            values:
+            - celo-fullnode
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+      weight: 100
 
 storage:
   enable: true
@@ -98,6 +110,11 @@ geth:
     maxpeers: 1000
     serve: 70
   ws_port: 8546
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetAverageUtilization: 80
 
 genesis:
   networkId: 31418

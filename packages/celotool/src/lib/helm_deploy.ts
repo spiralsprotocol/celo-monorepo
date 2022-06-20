@@ -327,19 +327,20 @@ export async function helmAddAndUpdateRepos() {
 
 export async function installCertManager() {
   const clusterIssuersHelmChartPath = `../helm-charts/cert-manager-cluster-issuers`
+  const certManagerVersion = `v1.8.1`
 
   console.info('Create the namespace for cert-manager')
   await execCmdWithExitOnFailure(`kubectl create namespace cert-manager`)
 
   console.info('Installing cert-manager CustomResourceDefinitions')
   await execCmdWithExitOnFailure(
-    `kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.2.0/cert-manager.crds.yaml`
+    `kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/${certManagerVersion}/cert-manager.crds.yaml`
   )
   console.info('Updating cert-manager-cluster-issuers chart dependencies')
   await execCmdWithExitOnFailure(`helm dependency update ${clusterIssuersHelmChartPath}`)
   console.info('Installing cert-manager-cluster-issuers')
   await execCmdWithExitOnFailure(
-    `helm install cert-manager-cluster-issuers ${clusterIssuersHelmChartPath} -n cert-manager`
+    `helm install cert-manager-cluster-issuers ${clusterIssuersHelmChartPath} -n cert-manager --version ${certManagerVersion}`
   )
 }
 

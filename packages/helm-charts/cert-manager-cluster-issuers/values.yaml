@@ -2,6 +2,7 @@ imagePullPolicy: IfNotPresent
 
 # Values that are used for the dependency `cert-manager`
 cert-manager:
+  installCRDs: false
   ingressShim:
     defaultIssuerKind: ClusterIssuer
     defaultIssuerName: letsencrypt-prod

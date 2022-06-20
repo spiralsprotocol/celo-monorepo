@@ -11,6 +11,7 @@ jobs: {}
 prometheus:
   imageTag: v2.27.1
   retention_time: 7d
+  jobs: []
 
 # TODO: remove values from the .env files...
 scrapeJob: {}

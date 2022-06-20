@@ -207,6 +207,7 @@ fi
       --datadir=/root/.celo \
       --ipcpath=geth.ipc \
       --txlookuplimit {{ .Values.geth.txlookuplimit | default 0 }} \
+      --txFeeRecipient {{ .txFeeRecipient | default "0x0000000000000000000000000000000000000000" }} \
       ${ADDITIONAL_FLAGS}
   env:
   - name: GETH_DEBUG
