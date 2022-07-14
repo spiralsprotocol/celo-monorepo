@@ -113,7 +113,6 @@ contract FederatedAttestations is
     address account,
     uint64 issuedOn
   ) external {
-    // TODO allow for updating existing attestation by only updating signer and publishedOn
     require(issuer == msg.sender);
     _registerAttestation(identifier, issuer, account, issuer, issuedOn);
   }
@@ -140,7 +139,6 @@ contract FederatedAttestations is
     bytes32 r,
     bytes32 s
   ) external {
-    // TODO allow for updating existing attestation by only updating signer and publishedOn
     validateAttestationSig(identifier, issuer, account, signer, issuedOn, v, r, s);
     _registerAttestation(identifier, issuer, account, signer, issuedOn);
   }
